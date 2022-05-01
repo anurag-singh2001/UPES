@@ -1,0 +1,5 @@
+Delhi	1631000
+Kolkata	1411000
+Chennai	870000
+Bangalore 8500000
+Hyderabad 7750000
