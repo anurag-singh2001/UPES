@@ -1,0 +1,27 @@
+{
+    "files.associations": {
+        "exp2_q1.C": "cpp",
+        "exp2_q2.C": "cpp",
+        "exp3_q1.C": "cpp",
+        "exp3_q3.C": "cpp",
+        "exp4_q1.C": "cpp",
+        "exp5_q1.C": "cpp",
+        "exp5_q2.C": "cpp",
+        "queue_using_linklist.C": "cpp",
+        "a.C": "cpp",
+        "bubblesort.C": "cpp",
+        "selectionsort.C": "cpp",
+        "exp4_q2.C": "cpp",
+        "insertionsort.C": "cpp",
+        "hashing.C": "cpp",
+        "quicksort.C": "cpp",
+        "bst.C": "cpp",
+        "exp9_q1.C": "cpp",
+        "exp9_q3.C": "cpp",
+        "exp-8_q1.C": "cpp",
+        "exp-8_q2.C": "cpp",
+        "exp-8_q3.C": "cpp",
+        "exp-10_q1.C": "cpp",
+        "exp-10_q2.C": "cpp"
+    }
+}
