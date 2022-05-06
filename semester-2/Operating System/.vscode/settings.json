@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "os1.C": "cpp",
+        "bubblesort.C": "cpp",
+        "roundrobin.C": "cpp",
+        "priority.C": "cpp",
+        "fcfs.C": "cpp",
+        "roundrobin1.C": "cpp",
+        "sjf.C": "cpp",
+        "fork.C": "cpp"
+    }
+}
