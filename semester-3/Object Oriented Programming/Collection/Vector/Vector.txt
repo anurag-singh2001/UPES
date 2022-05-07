@@ -1,0 +1,50 @@
+The Vector class is an implementation of the List interface that allows us to
+create resizable-arrays similar to the ArrayList class.
+
+Java Vector vs. ArrayList
+    In Java, both ArrayList and Vector implements the List interface and
+    provides the same functionalities. However, there exist some differences between them.
+
+    The Vector class synchronizes each individual operation.
+    This means whenever we want to perform some operation on vectors,
+    the Vector class automatically applies a lock to that operation.
+
+    It is because when one thread is accessing a vector,
+    and at the same time another thread tries to access it,
+    an exception called ConcurrentModificationException is generated.
+    Hence, this continuous use of lock for each operation makes vectors less efficient.
+
+    However, in array lists, methods are not synchronized.
+    Instead, it uses the Collections.synchronizedList() method
+    that synchronizes the list as a whole.
+
+Note:
+    It is recommended to use ArrayList in place of Vector
+    because vectors are not threadsafe and are less efficient.
+
+
+Methods of Vector
+
+    The Vector class also provides the resizable-array
+    implementations of the List interface (similar to the ArrayList class).
+    Some Vector methods are:
+       * Add Elements to Vector
+            add(element) - adds an element to vectors
+            add(index, element) - adds an element to the specified position
+            addAll(vector) - adds all elements of a vector to another vector
+
+       * Access Vector Elements
+             get(index) - returns an element specified by the index
+             iterator() - returns an iterator object to sequentially access vector elements
+
+       * Remove Vector Elements
+             remove(index) - removes an element from specified position
+             removeAll() - removes all the elements
+             clear() - removes all elements. It is more efficient than removeAll()
+
+    Others Vector Methods
+        set()	changes an element of the vector
+        size()	returns the size of the vector
+        toArray()	converts the vector into an array
+        toString()	converts the vector into a String
+        contains()	searches the vector for specified element and returns a boolean result
