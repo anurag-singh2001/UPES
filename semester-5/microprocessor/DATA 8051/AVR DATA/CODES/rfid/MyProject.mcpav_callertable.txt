@@ -1,0 +1,11 @@
+main
+	init_lcd
+		cmd_lcd
+	string_lcd
+		data_lcd
+	init_serial
+		Div_32x32_U
+	rec_serial
+	cmd_lcd
+	data_lcd
+	__CC2DW

@@ -1,0 +1,49 @@
+C51 COMPILER V8.12   STEPPER                                                               01/01/2007 04:24:11 PAGE 1   
+
+
+C51 COMPILER V8.12, COMPILATION OF MODULE STEPPER
+OBJECT MODULE PLACED IN stepper.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE stepper.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                                                  #include<reg51.h>
+   2          delay()
+   3          {
+   4   1      int i;
+   5   1      for(i=0;i<=6000;i++);//1000 fast///3000 medium//6000  slow
+   6   1      }
+   7          void main()
+   8          {
+   9   1      while(1)
+  10   1      {
+  11   2      
+  12   2      P0=0x03;
+  13   2      delay();
+  14   2      
+  15   2      P0=0x06;
+  16   2      delay();
+  17   2      
+  18   2      
+  19   2      P0=0x0c;
+  20   2      delay();
+  21   2      
+  22   2      P0=0x09;
+  23   2      delay();
+  24   2      
+  25   2      };
+  26   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     41    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

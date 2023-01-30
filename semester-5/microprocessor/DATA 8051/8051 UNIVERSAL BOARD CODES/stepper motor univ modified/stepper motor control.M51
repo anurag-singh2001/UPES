@@ -1,0 +1,93 @@
+BL51 BANKED LINKER/LOCATER V6.11                                                        01/01/2007  04:24:11  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.11, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE stepper.obj TO stepper motor control RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  stepper.obj (STEPPER)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  stepper motor control (STEPPER)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     07FDH                  *** GAP ***
+            CODE    0800H     001AH     UNIT         ?PR?MAIN?STEPPER
+            CODE    081AH     000FH     UNIT         ?PR?DELAY?STEPPER
+            CODE    0829H     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   stepper motor control (STEPPER)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?STEPPER
+
+?PR?MAIN?STEPPER
+  +--> ?PR?DELAY?STEPPER
+
+
+
+SYMBOL TABLE OF MODULE:  stepper motor control (STEPPER)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        STEPPER
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  C:081AH         PUBLIC        delay
+  C:0800H         PUBLIC        main
+  -------         PROC          DELAY
+  -------         DO            
+  D:0006H         SYMBOL        i
+BL51 BANKED LINKER/LOCATER V6.11                                                      01/01/2007  04:24:11  PAGE 2
+
+
+  -------         ENDDO         
+  C:081AH         LINE#         2
+  C:081AH         LINE#         3
+  C:081AH         LINE#         5
+  C:0828H         LINE#         6
+  -------         ENDPROC       DELAY
+  -------         PROC          MAIN
+  C:0800H         LINE#         7
+  C:0800H         LINE#         8
+  C:0800H         LINE#         9
+  C:0800H         LINE#         10
+  C:0800H         LINE#         12
+  C:0803H         LINE#         13
+  C:0806H         LINE#         15
+  C:0809H         LINE#         16
+  C:080CH         LINE#         19
+  C:080FH         LINE#         20
+  C:0812H         LINE#         22
+  C:0815H         LINE#         23
+  C:0818H         LINE#         25
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        STEPPER
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0029H BYTE ( 2%) *
+******************************************************************************
+
+Program Size: data=9.0 xdata=0 code=56
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

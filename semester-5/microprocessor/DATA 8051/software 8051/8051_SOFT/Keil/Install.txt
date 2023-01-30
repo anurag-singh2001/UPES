@@ -1,0 +1,52 @@
+Keil uVision v 8.12 - C51 version - How to install
+-----------------------------------------------------
+
+
+1) Install Keil software with c51v812.exe
+
+  a) Press Next
+  b) Accept the license -> Next
+  c) Destination folder: C:\Keil -> Next
+  d) Fill the form with any name -> Next
+  e) Wait the installation
+  f) Finish
+
+2) Copy the file l51.dll to the folder
+    C:\Keil\C51\BIN
+   Overwrite the existing l51.dll file
+
+3) Execute uVision 3 from the Start Menu
+    or the Desktop
+   Goto File -> License Management...
+   Copy the Computer ID field (CID)
+
+6) Execute the license generator
+    licgen-v32.exe
+
+7) In the MCU type, choose 51
+   In the right list, choose Prof. Developers Kit
+   In the bellow list, choose With computer ID code
+   Select the V2 item
+   Select External CID code
+   Paste the previously copied CID
+   Press Generate
+   Copy the generated LIC0= field
+   Ignore the SN= field
+
+8) Goto the License Management of uVision
+   Paste the license generated with the licgen
+    in the New License ID Code (LIC) field
+   Press Add Lic
+   Press Close
+
+9) Exit from uVision
+
+10) Exit from license generator
+
+11) Enjoy!
+
+
+Note: If the generated license expires in a few days,
+    generate another license number with many years
+    of Support Period.
+

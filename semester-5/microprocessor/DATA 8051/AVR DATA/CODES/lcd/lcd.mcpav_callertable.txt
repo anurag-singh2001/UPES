@@ -1,0 +1,7 @@
+main
+	init_lcd
+		cmd_lcd
+	cmd_lcd
+	string_lcd
+		data_lcd
+	__CC2DW

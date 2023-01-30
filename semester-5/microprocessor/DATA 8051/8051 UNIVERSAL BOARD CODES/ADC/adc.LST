@@ -1,0 +1,154 @@
+C51 COMPILER V8.12   ADC                                                                   06/29/2013 12:29:51 PAGE 1   
+
+
+C51 COMPILER V8.12, COMPILATION OF MODULE ADC
+OBJECT MODULE PLACED IN adc.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE adc.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /********************ADC*********************/
+   2          
+   3          /***************Connections******************/
+   4          
+   5          /********       LCD control --- PORT 2 **********/
+   6          /********       LCD data ----- PORT 0  **********/
+   7          /********    ADC control ---- PORT 3   *********/
+   8          /********       ADC data ----- PORT 1 ***********/
+   9          
+  10          
+  11          
+  12          #include<reg51.h>
+  13          
+  14          char arr4[12]="DIGITAL O/P ";
+  15          
+  16                  sbit ALE=P1^2;
+  17                  sbit SOC=P1^1;
+  18                  sbit OE=P1^0;
+  19                  sbit EOC=P1^3;
+  20                  sbit SET0=P1^4;
+  21                  sbit SET1=P1^5;
+  22                  sbit SET2=P1^6;
+  23                  sbit CLOCK=P1^7;
+  24                  sbit rs=P2^0;
+  25                  sbit e=P2^1;
+  26          
+  27          unsigned char adc_val;
+  28          unsigned char temp[5];
+  29          
+  30                  void instwrt(void);
+  31                  void datawrt(void);
+  32                  void int_lcd(void);
+  33                  void clock(void);
+  34                  void delay(int x);
+  35          
+  36          void main(void)
+  37          { 
+  38   1        int i;
+  39   1        char dummy;
+  40   1        int_lcd();
+  41   1        for(i=0;i<12;i++)
+  42   1         {
+  43   2          P0=arr4[i];
+  44   2              datawrt();
+  45   2              delay(2);
+  46   2         }
+  47   1         while(1)
+  48   1         {
+  49   2          SET0=1;
+  50   2          SET1=1;                               //for the select line
+  51   2          SET2=1;
+  52   2          ALE=1;
+  53   2          SOC=1;
+  54   2          clock();
+  55   2          ALE=0;  
+C51 COMPILER V8.12   ADC                                                                   06/29/2013 12:29:51 PAGE 2   
+
+  56   2          SOC=0;
+  57   2          clock();
+  58   2          while(!EOC);
+  59   2          OE=1;
+  60   2          adc_val=P3;
+  61   2          dummy=P3;
+  62   2         
+  63   2          for(i=0;i<3;i++)
+  64   2          {
+  65   3               temp[i]=adc_val%10;
+  66   3               adc_val /=10;
+  67   3          } 
+  68   2          P0=0x8C;
+  69   2          instwrt();
+  70   2          delay(2);
+  71   2          for(i=2;i>=0;i--)
+  72   2          {
+  73   3           P0=temp[i]+0x30;
+  74   3               datawrt();
+  75   3               delay(2);
+  76   3          }
+  77   2          
+  78   2        
+  79   2         }
+  80   1       }
+  81          
+  82          void instwrt(void)
+  83          {
+  84   1      rs=0;
+  85   1      e=1;
+  86   1      e=0;
+  87   1      }
+  88          void datawrt(void)
+  89          {
+  90   1      rs=1;
+  91   1      e=1;
+  92   1      e=0;
+  93   1      }
+  94          void int_lcd(void)
+  95          {
+  96   1      P0=0x38;
+  97   1      instwrt();
+  98   1      delay(2);
+  99   1      P0=0x01;
+ 100   1      instwrt();
+ 101   1      delay(2);
+ 102   1      P0=0x06;
+ 103   1      instwrt();
+ 104   1      delay(2);
+ 105   1      P0=0x0c;
+ 106   1      instwrt();
+ 107   1      delay(2);
+ 108   1      P0=0x80;
+ 109   1      instwrt();
+ 110   1      delay(2);
+ 111   1      }
+ 112          
+ 113          void delay(int x)
+ 114          {
+ 115   1       int i,j;
+ 116   1       for(j=0;j<x;j++)
+ 117   1        for(i=0;i<10000;i++);
+C51 COMPILER V8.12   ADC                                                                   06/29/2013 12:29:51 PAGE 3   
+
+ 118   1      }
+ 119          void clock(void)
+ 120          {
+ 121   1       int a,b;
+ 122   1       for(b=0;b<=1000;b++)
+ 123   1       {
+ 124   2        for(a=0;a<30;a++);
+ 125   2        CLOCK=~CLOCK;
+ 126   2       }
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    289    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

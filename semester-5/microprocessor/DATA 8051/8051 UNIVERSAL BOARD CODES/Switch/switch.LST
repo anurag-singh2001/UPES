@@ -1,0 +1,41 @@
+C51 COMPILER V7.20   SWITCH                                                                12/26/2006 16:18:08 PAGE 1   
+
+
+C51 COMPILER V7.20, COMPILATION OF MODULE SWITCH
+OBJECT MODULE PLACED IN switch.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE switch.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          /***************SWITCH***********/
+   3          
+   4          /***************Connections******************/
+   5          
+   6          /**********     LEDs - port0    ************/
+   7          /**********     LEDs - port2    ************/
+   8          
+   9          //------------------------------------------------------//
+  10          
+  11          #include<reg51.h>
+  12          void main(void)
+  13          {
+  14   1       while(1)
+  15   1       {
+  16   2        P0=P2;
+  17   2       }
+  18   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      5    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

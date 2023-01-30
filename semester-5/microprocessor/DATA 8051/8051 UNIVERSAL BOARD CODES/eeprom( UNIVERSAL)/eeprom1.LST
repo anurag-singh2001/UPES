@@ -1,0 +1,366 @@
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE EEPROM1
+OBJECT MODULE PLACED IN eeprom1.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE eeprom1.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                                                   
+   2          
+   3          /* CONNECT P0---Lcd control///
+   4          /*  P2-----LCd data/////
+   5          /*  P1L--- Eprom sec.*/
+   6          
+   7          
+   8          
+   9          #include<reg51.h>
+  10          #include<intrins.h>
+  11          
+  12          typedef unsigned char uchar;
+  13          typedef unsigned long ulong;
+  14          typedef unsigned int  uint;
+  15          
+  16          #define         TIMER_RELOAD (-921)
+  17          #define         port_delay()     _nop_(), _nop_(), _nop_(), _nop_()
+  18          #define         AVG     10
+  19          
+  20          sbit  LRS               =   P0 ^ 0;
+  21          sbit  LEN               =   P0 ^ 1;
+  22          sbit SCL                =       P1 ^ 5; 
+  23          sbit SDA                =       P1 ^ 4;
+  24          
+  25          uint count;
+  26          uchar rdata,edata;
+  27          
+  28          void timer0(void)
+  29          interrupt 1 using 1
+  30          {
+  31   1              count++;
+  32   1              TH0 = (uchar)(TIMER_RELOAD>>8);
+  33   1              TL0 = (uchar)TIMER_RELOAD;
+  34   1      }
+  35          
+  36          void delay(uint n)
+  37          {
+  38   1              n = count + n;
+  39   1         while (n != count);
+  40   1      }
+  41          
+  42          void dispstr(uchar *str, uchar stcol, uchar encol) 
+  43          {
+  44   1         uint q;
+  45   1              if(stcol <= 15)
+  46   1                      P2 = 0x80 + stcol;
+  47   1              else
+  48   1                      P2 = 0xB0 + stcol;
+  49   1              LRS = 0;
+  50   1              LEN = 1;
+  51   1          LEN = 0;
+  52   1          delay(1);
+  53   1              LRS = 1;
+  54   1              q=0;
+  55   1              for(; stcol <= encol; stcol++)
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 2   
+
+  56   1              {
+  57   2                      if(stcol == 16)
+  58   2                      {
+  59   3                              P2 = 0xB0 + stcol;
+  60   3                              LRS = 0;
+  61   3                              LEN = 1;
+  62   3                         LEN = 0;
+  63   3                              delay(1);
+  64   3                              LRS = 1;
+  65   3                      }
+  66   2                      P2 = str[q];
+  67   2                      q++;
+  68   2                      LEN = 1;
+  69   2                 LEN = 0;
+  70   2                      delay(1);
+  71   2              }
+  72   1      }
+  73           
+  74          
+  75          void dispnum(uint no, uchar stcol, uchar encol) 
+  76          {
+  77   1              uchar temp[5];
+  78   1              uchar i,k;
+  79   1              for (i = 0; i < 5; i++)
+  80   1              {
+  81   2                      temp[i] = no % 10;
+  82   2                      no /= 10;
+  83   2              }
+  84   1              if(stcol <= 15)
+  85   1                      P2 = 0x80 + stcol;
+  86   1              else
+  87   1                      P2 = 0xB0 + stcol;
+  88   1              LRS = 0;
+  89   1              LEN = 1;
+  90   1          LEN = 0;
+  91   1          delay(1);
+  92   1              LRS = 1;
+  93   1              i = k = 4;
+  94   1              for(; stcol <= encol; stcol++)
+  95   1              {
+  96   2                      if( k == 1)
+  97   2                      {
+  98   3                              k = 200;
+  99   3                              dispstr(".",stcol,stcol);
+ 100   3                      }
+ 101   2                      else
+ 102   2                      {
+ 103   3                              P2 = temp[i] + 0x30;
+ 104   3                              i--;
+ 105   3                              k--;
+ 106   3                              LEN = 1;
+ 107   3                          LEN = 0;
+ 108   3                              delay(1);
+ 109   3                      }
+ 110   2              }
+ 111   1      }
+ 112          
+ 113          void clrlcd()
+ 114          {
+ 115   1              LRS = 0;
+ 116   1              P2 = 0x01;
+ 117   1              LEN = 1;
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 3   
+
+ 118   1              LEN = 0;
+ 119   1              delay(6);
+ 120   1      }
+ 121          
+ 122          void start(void)
+ 123          {
+ 124   1         SDA = 1 ;
+ 125   1         _nop_() , _nop_() , _nop_() ;
+ 126   1              SCL = 1;
+ 127   1         _nop_() , _nop_() , _nop_() ;
+ 128   1         SDA = 0 ;
+ 129   1         _nop_() , _nop_() , _nop_() ;
+ 130   1         SCL = 0 ;
+ 131   1         _nop_() , _nop_() , _nop_() ;
+ 132   1      }
+ 133          
+ 134          void stop(void)
+ 135          {
+ 136   1         SDA = 0 ;
+ 137   1         _nop_() , _nop_() , _nop_() ;
+ 138   1         SCL = 1;
+ 139   1         _nop_() , _nop_() , _nop_() ;
+ 140   1         SDA = 1 ;
+ 141   1         _nop_() , _nop_() , _nop_() ;
+ 142   1         SCL = 0 ;
+ 143   1         _nop_() , _nop_() , _nop_() ;
+ 144   1      }
+ 145          
+ 146          void clock(void)
+ 147          {
+ 148   1         _nop_() ; _nop_() ; _nop_() ;
+ 149   1         SCL = 1;
+ 150   1         _nop_() ; _nop_() ; _nop_() ;
+ 151   1         SCL = 0 ;
+ 152   1         _nop_() ; _nop_() ; _nop_() ;
+ 153   1      }
+ 154          
+ 155          void nack(void)
+ 156          {
+ 157   1          SDA = 1 ;
+ 158   1          clock() ;
+ 159   1      } 
+ 160          
+ 161          void opdat(uchar dat)
+ 162          {
+ 163   1         uchar i ;
+ 164   1         _nop_() , _nop_() , _nop_() ;
+ 165   1         for ( i = 0 ; i < 8 ; i++ )
+ 166   1         {
+ 167   2            if ( ( dat >> ( 7 - i ) ) & 0x01 )        SDA = 1 ; 
+ 168   2            else                                                                      SDA = 0 ;
+ 169   2            clock() ;
+ 170   2         }
+ 171   1      }
+ 172          
+ 173          void waitack(void)
+ 174          {
+ 175   1         SDA = 1 ;
+ 176   1         SCL = 1;
+ 177   1         _nop_() , _nop_() , _nop_() ;
+ 178   1         SCL = 0 ;
+ 179   1         _nop_() , _nop_() , _nop_() ;
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 4   
+
+ 180   1      }
+ 181          
+ 182          
+ 183          uchar getdat(void)
+ 184          {
+ 185   1         uchar i , dat;
+ 186   1         SDA = 1;
+ 187   1         _nop_() , _nop_() , _nop_();
+ 188   1         for ( i = 0 ; i < 8 ; i++ ) 
+ 189   1         {
+ 190   2                 SCL = 1;
+ 191   2            dat = ( ( ( dat << 1 ) & 0xfe ) | SDA );
+ 192   2                 _nop_() , _nop_() , _nop_();
+ 193   2            SCL = 0;
+ 194   2                 _nop_() , _nop_() , _nop_();
+ 195   2         }
+ 196   1         return dat;
+ 197   1      }
+ 198          
+ 199          uchar i2c_read(uchar addr)
+ 200          {
+ 201   1              start();                //dummy write start
+ 202   1              opdat(0xa0);    //send dev addr
+ 203   1              waitack();
+ 204   1      
+ 205   1              opdat(addr);
+ 206   1              waitack();
+ 207   1      
+ 208   1          start();            //start read
+ 209   1          opdat(0xa1);    //give dev adddr or with for read 
+ 210   1          waitack();          //operation coz lsb gives r|w
+ 211   1                                                  
+ 212   1          rdata = getdat();
+ 213   1          nack() ;
+ 214   1          stop() ;
+ 215   1      
+ 216   1         return(rdata);
+ 217   1      }
+ 218             
+ 219          void i2c_write(uchar dat, uchar addr)
+ 220          {                       
+ 221   1              start();                        
+ 222   1                                                              
+ 223   1              opdat(0xa0);    //dummy write start
+ 224   1              waitack();              //send dev addr
+ 225   1              
+ 226   1              opdat(addr);
+ 227   1              waitack();
+ 228   1      
+ 229   1              opdat(dat);             //write data
+ 230   1              waitack();
+ 231   1      
+ 232   1              stop();
+ 233   1      }
+ 234          
+ 235          void io_open(void)
+ 236          {
+ 237   1              LEN = 0;
+ 238   1              TMOD = 0x21;
+ 239   1              IE = 0x92; //1001 0010
+ 240   1              SCON = 0x50; //0101 0000
+ 241   1              REN = 1;
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 5   
+
+ 242   1              TL0 = (uchar)TIMER_RELOAD;
+ 243   1              TH0 = (uchar)TIMER_RELOAD >> 8;
+ 244   1              TH1 = TL1 = 0xFA;
+ 245   1              TR0 = 1;
+ 246   1              TR1 = 1;
+ 247   1      }
+ 248          
+ 249          void initlcd(void)
+ 250          {
+ 251   1              LEN = 0;
+ 252   1              LRS = 0;
+ 253   1              delay(20);
+ 254   1      
+ 255   1         P2 = 0x30;
+ 256   1         LEN = 1;
+ 257   1         delay(1);
+ 258   1         LEN = 0;
+ 259   1         delay(6);
+ 260   1        
+ 261   1         P2 = 0x30;
+ 262   1         LEN = 1;
+ 263   1         delay(1);
+ 264   1         LEN = 0;
+ 265   1         delay(6);
+ 266   1      
+ 267   1         P2 = 0x30; 
+ 268   1         LEN = 1;
+ 269   1         delay(1);
+ 270   1         LEN = 0;
+ 271   1         delay(6);
+ 272   1      
+ 273   1         P2 = 0x38;  //funtion set    
+ 274   1         LEN = 1;
+ 275   1         delay(1);
+ 276   1         LEN = 0;
+ 277   1         delay(6);
+ 278   1      
+ 279   1         P2 = 0x0c8;    //display off
+ 280   1         LEN = 1;
+ 281   1         delay(1);
+ 282   1         LEN = 0;
+ 283   1         delay(6);
+ 284   1      
+ 285   1         P2 = 0x01;  //clear display;
+ 286   1         LEN = 1;
+ 287   1         delay(1);
+ 288   1         LEN = 0;
+ 289   1         delay(6);
+ 290   1      
+ 291   1         P2 = 0x06; //entry mode set
+ 292   1         LEN = 1;
+ 293   1         delay(1);
+ 294   1         LEN = 0;
+ 295   1         delay(6);
+ 296   1      
+ 297   1         P2 = 0x0c; //display  on
+ 298   1         LEN = 1;
+ 299   1              delay(1);
+ 300   1         LEN = 0;
+ 301   1         delay(6);
+ 302   1      
+ 303   1      }
+C51 COMPILER V8.02   EEPROM1                                                               08/31/2011 10:32:48 PAGE 6   
+
+ 304          
+ 305          void main(void)
+ 306          {
+ 307   1              uchar i;
+ 308   1      
+ 309   1              io_open();
+ 310   1              initlcd();
+ 311   1              clrlcd ();
+ 312   1              dispstr("     ADVANCE    ",0,15);
+ 313   1      
+ 314   1              for(i = 0; i <200;i++)
+ 315   1              {
+ 316   2                      i2c_write(i,i);
+ 317   2                      delay(50);
+ 318   2              }
+ 319   1              i = 0;
+ 320   1      
+ 321   1              clrlcd();
+ 322   1              while(1)
+ 323   1              {
+ 324   2                      edata = i2c_read(i);
+ 325   2                      dispnum(edata,16,21);
+ 326   2                      i++;
+ 327   2                      dispstr("     ADVANCE    ",0,15);
+ 328   2                      delay(2000);
+ 329   2                      clrlcd();
+ 330   2              }
+ 331   1      }
+ 332          
+ 333          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    734    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4      18
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

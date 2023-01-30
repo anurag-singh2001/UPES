@@ -1,0 +1,444 @@
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 1   
+
+
+C51 COMPILER V7.20, COMPILATION OF MODULE RTC
+OBJECT MODULE PLACED IN rtc.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE rtc.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          /*******************RTC************************/
+   3          
+   4          /****************connections ******************/
+   5          
+   6          /*********      LCD control --- PORT 0  **********/
+   7          /*********      LCD DATA ----- PORT 2   **********/
+   8          /*********      RTC SEC ---- PORT 1         **********/
+   9          
+  10          
+  11          
+  12          #include<reg51.h>
+  13          #include<intrins.h>
+  14          
+  15          typedef unsigned char uchar;
+  16          typedef unsigned long ulong;
+  17          typedef unsigned int  uint;
+  18          
+  19          #define         TIMER_RELOAD (-921)
+  20          #define         port_delay()     _nop_(), _nop_(), _nop_(), _nop_()
+  21          #define         AVG     10
+  22          
+  23          sbit  LRS               =   P0 ^ 0;
+  24          sbit  LEN               =   P0 ^ 1;
+  25          sbit ICLK               =       P1 ^ 5;
+  26          sbit IDAT               =       P1 ^ 4;
+  27          
+  28          uint count;
+  29          uchar rdata,edata;
+  30          uint time;
+  31          uchar second,minute,hour,day,date,month,year;
+  32          
+  33          
+  34          void timer0(void)
+  35          interrupt 1 using 1
+  36          {
+  37   1              count++;
+  38   1              TH0 = (uchar)(TIMER_RELOAD>>8);
+  39   1              TL0 = (uchar)TIMER_RELOAD;
+  40   1      }
+  41          
+  42          void delay(uint n)
+  43          {
+  44   1              n = count + n;
+  45   1         while (n != count);
+  46   1      }
+  47          
+  48          void dispstr(uchar *str, uchar stcol, uchar encol) 
+  49          {
+  50   1         uint q;
+  51   1              if(stcol <= 15)
+  52   1                      P2 = 0x80 + stcol;
+  53   1              else
+  54   1                      P2 = 0xB0 + stcol;
+  55   1              LRS = 0;
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 2   
+
+  56   1              LEN = 1;
+  57   1          LEN = 0;
+  58   1          delay(1);
+  59   1              LRS = 1;
+  60   1              q=0;
+  61   1              for(; stcol <= encol; stcol++)
+  62   1              {
+  63   2                      if(stcol == 16)
+  64   2                      {
+  65   3                              P2 = 0xB0 + stcol;
+  66   3                              LRS = 0;
+  67   3                              LEN = 1;
+  68   3                         LEN = 0;
+  69   3                              delay(1);
+  70   3                              LRS = 1;
+  71   3                      }
+  72   2                      P2 = str[q];
+  73   2                      q++;
+  74   2                      LEN = 1;
+  75   2                 LEN = 0;
+  76   2                      delay(1);
+  77   2              }
+  78   1      }
+  79           
+  80          
+  81          void dispnum(uint no, uchar stcol, uchar encol) 
+  82          {
+  83   1              uchar temp[5];
+  84   1              uchar i;
+  85   1              for (i = 0; i < 2; i++)
+  86   1              {
+  87   2                      temp[i] = no % 10;
+  88   2                      no /= 10;
+  89   2              }
+  90   1              if(stcol <= 15)
+  91   1                      P2 = 0x80 + stcol;
+  92   1              else
+  93   1                      P2 = 0xB0 + stcol;
+  94   1              LRS = 0;
+  95   1              LEN = 1;
+  96   1          LEN = 0;
+  97   1          delay(1);
+  98   1              LRS = 1;
+  99   1              i = 1;
+ 100   1              for(; stcol <= encol; stcol++)
+ 101   1              {
+ 102   2                      P2 = temp[i] + 0x30;
+ 103   2                      i--;
+ 104   2                      LEN = 1;
+ 105   2                  LEN = 0;
+ 106   2                      delay(1);
+ 107   2              }
+ 108   1      }
+ 109          
+ 110          void clrlcd()
+ 111          {
+ 112   1              LRS = 0;
+ 113   1              P2 = 0x01;
+ 114   1              LEN = 1;
+ 115   1              LEN = 0;
+ 116   1              delay(6);
+ 117   1      }
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 3   
+
+ 118          
+ 119          void str1307(void)
+ 120          {
+ 121   1         IDAT = 1 ;
+ 122   1         _nop_() , _nop_() , _nop_() ;
+ 123   1         ICLK = 1 ;
+ 124   1         _nop_() , _nop_() , _nop_() ;
+ 125   1         IDAT = 0 ;
+ 126   1         _nop_() , _nop_() , _nop_() ;
+ 127   1         ICLK = 0 ;
+ 128   1         _nop_() , _nop_() , _nop_() ;
+ 129   1      }
+ 130          
+ 131          void stp1307(void)
+ 132          {
+ 133   1         IDAT = 0 ;
+ 134   1         _nop_() , _nop_() , _nop_() ;
+ 135   1         ICLK = 1 ;
+ 136   1         _nop_() , _nop_() , _nop_() ;
+ 137   1         IDAT = 1 ;
+ 138   1         _nop_() , _nop_() , _nop_() ;
+ 139   1         ICLK = 0 ;
+ 140   1         _nop_() , _nop_() , _nop_() ;
+ 141   1      }
+ 142          
+ 143          void clock(void)
+ 144          {
+ 145   1         _nop_() ; _nop_() ; _nop_() ;
+ 146   1         ICLK = 1 ;
+ 147   1         _nop_() ; _nop_() ; _nop_() ;
+ 148   1         ICLK = 0 ;
+ 149   1         _nop_() ; _nop_() ; _nop_() ;
+ 150   1      }
+ 151          
+ 152          void ack1307(void)
+ 153          {
+ 154   1          IDAT = 0 ;
+ 155   1          clock() ;
+ 156   1      }
+ 157          
+ 158          void nack1307(void)
+ 159          {
+ 160   1          IDAT = 1 ;
+ 161   1          clock() ;
+ 162   1      }
+ 163          
+ 164          void opdat(char rtcdata)
+ 165          {
+ 166   1         char i ;
+ 167   1         for ( i = 0 ; i < 8 ; i++ )
+ 168   1         {
+ 169   2            if ( ( rtcdata >> ( 7 - i ) ) & 0x01 )  IDAT = 1 ; 
+ 170   2            else                                                                                               IDAT = 0 ;
+ 171   2               clock() ;
+ 172   2         }
+ 173   1      }
+ 174          
+ 175          void waitack(void)
+ 176          {
+ 177   1      //   watch() ;
+ 178   1         IDAT = 1 ;
+ 179   1         _nop_() , _nop_() , _nop_() ;
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 4   
+
+ 180   1         while ( IDAT ) ;
+ 181   1         ICLK = 1 ;
+ 182   1         _nop_() , _nop_() , _nop_() ;
+ 183   1         ICLK = 0 ;
+ 184   1      }
+ 185          
+ 186          char getdat(void)
+ 187          {
+ 188   1         char i , dat ;
+ 189   1      //   watch() ;
+ 190   1         IDAT = 1 ;
+ 191   1         _nop_() , _nop_() , _nop_() ;
+ 192   1         for ( i = 0 ; i < 8 ; i++ ) 
+ 193   1         {
+ 194   2            ICLK = 1 ;
+ 195   2            dat = ( ( ( dat << 1 ) & 0xfe ) | IDAT ) ;
+ 196   2                 _nop_() , _nop_() , _nop_() ;
+ 197   2            ICLK = 0 ;
+ 198   2                 _nop_() , _nop_() , _nop_() ;
+ 199   2         }
+ 200   1         return dat ;
+ 201   1      }
+ 202          
+ 203          
+ 204          void getrtc(void)
+ 205          {
+ 206   1         char rdata ;
+ 207   1      //   watch() ;
+ 208   1         str1307() ;
+ 209   1         opdat(0xd0) ;
+ 210   1         waitack() ;
+ 211   1         opdat(0x00) ;
+ 212   1         waitack() ;
+ 213   1         stp1307() ;
+ 214   1         _nop_() , _nop_() , _nop_() ;
+ 215   1         str1307() ;
+ 216   1         opdat(0xd1) ;
+ 217   1         waitack() ;
+ 218   1         rdata = getdat() ;
+ 219   1         ack1307() ;
+ 220   1              second = ( rdata & 0x7f) ;
+ 221   1         rdata = getdat() ;
+ 222   1         ack1307() ;
+ 223   1              minute = ( rdata & 0x7f) ;
+ 224   1         rdata = getdat() ;
+ 225   1         ack1307() ;
+ 226   1              hour = ( rdata & 0x3f) ;
+ 227   1         rdata = getdat() ;
+ 228   1         ack1307() ;
+ 229   1      //   watch() ;
+ 230   1              day = ( rdata & 0x07) ;
+ 231   1         rdata = getdat() ;
+ 232   1         ack1307() ;
+ 233   1              date = ( rdata & 0x3f) ;
+ 234   1         rdata = getdat() ;
+ 235   1         ack1307() ;
+ 236   1              month = ( rdata & 0x1f) ;
+ 237   1         rdata = getdat() ;
+ 238   1         nack1307() ;
+ 239   1              year = rdata ;
+ 240   1         stp1307() ;
+ 241   1      }
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 5   
+
+ 242          
+ 243          void setrtc(void)
+ 244          {
+ 245   1         char rdata ;
+ 246   1      //   watch() ;
+ 247   1         str1307() ;
+ 248   1         opdat(0xd0) ;
+ 249   1         waitack() ;
+ 250   1         opdat(0x00) ;
+ 251   1         waitack() ;
+ 252   1         rdata = ( second & 0x7f) ;
+ 253   1         opdat(rdata) ;
+ 254   1         waitack() ;
+ 255   1         rdata = ( minute & 0x7f) ;
+ 256   1         opdat(rdata) ;
+ 257   1         waitack() ;
+ 258   1         rdata = ( hour & 0x3f) ;
+ 259   1         opdat(rdata) ;
+ 260   1         waitack() ;
+ 261   1         rdata = ( day & 0x07) ;
+ 262   1         opdat(rdata);
+ 263   1         waitack();
+ 264   1         rdata = ( date & 0x3f);
+ 265   1         opdat(rdata) ;
+ 266   1         waitack() ;
+ 267   1         rdata = ( month & 0x1f);
+ 268   1         opdat(rdata);
+ 269   1         waitack() ;
+ 270   1         rdata = year ;
+ 271   1         opdat(rdata) ;
+ 272   1         waitack() ;
+ 273   1         stp1307() ;
+ 274   1      }
+ 275          
+ 276          unsigned char bcdtime(unsigned char x)
+ 277          {
+ 278   1          return ( ( ( x / 10 ) << 4 ) + ( x % 10 ) ) ;
+ 279   1      }
+ 280          
+ 281          unsigned char binarytime(unsigned char x)
+ 282          {
+ 283   1          return ( ( ( x >> 4 ) * 10 ) + ( x & 0xf ) ) ;
+ 284   1      }
+ 285          
+ 286          void getrtc1(void)
+ 287          {
+ 288   1          getrtc() ;
+ 289   1      //    watch() ;
+ 290   1          year = binarytime( year );
+ 291   1          month = binarytime( month );
+ 292   1          date  = binarytime( date );
+ 293   1          hour = binarytime( hour );
+ 294   1          minute = binarytime( minute );
+ 295   1          second = binarytime( second );
+ 296   1      }
+ 297          
+ 298          void setrtc1(void)
+ 299          {
+ 300   1       //   watch() ;
+ 301   1          year   = bcdtime( year ) ;
+ 302   1          month  = bcdtime( month ) ;
+ 303   1          date   = bcdtime( date ) ;
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 6   
+
+ 304   1          hour   = bcdtime( hour ) ;
+ 305   1          minute = bcdtime( minute ) ;
+ 306   1          second = bcdtime( second ) ;
+ 307   1          setrtc() ;
+ 308   1      }
+ 309          
+ 310          
+ 311          
+ 312          void io_open(void)
+ 313          {
+ 314   1              LEN = 0;
+ 315   1              TMOD = 0x21;
+ 316   1              IE = 0x92; //1001 0010
+ 317   1              SCON = 0x50; //0101 0000
+ 318   1              REN = 1;
+ 319   1              TL0 = (uchar)TIMER_RELOAD;
+ 320   1              TH0 = (uchar)TIMER_RELOAD >> 8;
+ 321   1              TH1 = TL1 = 0xFA;
+ 322   1              TR0 = 1;
+ 323   1              TR1 = 1;
+ 324   1      }
+ 325          
+ 326          void initlcd(void)
+ 327          {
+ 328   1              LEN = 0;
+ 329   1              LRS = 0;
+ 330   1              delay(20);
+ 331   1      
+ 332   1          P2 = 0x30;
+ 333   1          LEN = 1;
+ 334   1          delay(1);
+ 335   1          LEN = 0;
+ 336   1          delay(6);
+ 337   1        
+ 338   1          P2 = 0x30;
+ 339   1          LEN = 1;
+ 340   1          delay(1);
+ 341   1          LEN = 0;
+ 342   1          delay(6);
+ 343   1      
+ 344   1          P2 = 0x30; 
+ 345   1          LEN = 1;
+ 346   1          delay(1);
+ 347   1          LEN = 0;
+ 348   1          delay(6);
+ 349   1      
+ 350   1          P2 = 0x38;  //funtion set   
+ 351   1          LEN = 1;
+ 352   1          delay(1);
+ 353   1          LEN = 0;
+ 354   1          delay(6);
+ 355   1       
+ 356   1          P2 = 0x0c8;    //display off
+ 357   1          LEN = 1;
+ 358   1          delay(1);
+ 359   1          LEN = 0;
+ 360   1          delay(6);
+ 361   1      
+ 362   1          P2 = 0x01;  //clear display;
+ 363   1          LEN = 1;
+ 364   1          delay(1);
+ 365   1          LEN = 0;
+C51 COMPILER V7.20   RTC                                                                   12/27/2006 16:38:44 PAGE 7   
+
+ 366   1          delay(6);
+ 367   1      
+ 368   1         P2 = 0x06; //entry mode set
+ 369   1         LEN = 1;
+ 370   1         delay(1);
+ 371   1         LEN = 0;
+ 372   1         delay(6);
+ 373   1      
+ 374   1         P2 = 0x0c; //display  on
+ 375   1         LEN = 1;
+ 376   1              delay(1);
+ 377   1         LEN = 0;
+ 378   1         delay(6);
+ 379   1      
+ 380   1      }
+ 381          
+ 382          void main(void)
+ 383          {
+ 384   1                      
+ 385   1              io_open();
+ 386   1              initlcd();
+ 387   1              clrlcd ();
+ 388   1              dispstr("     ADVANCE    ",0,15);
+ 389   1              delay(2000);
+ 390   1              minute = 52;
+ 391   1              hour = 3;
+ 392   1              second = 1;
+ 393   1              date = 18;
+ 394   1              month = 5;
+ 395   1              year = 4;
+ 396   1      
+ 397   1              setrtc1();
+ 398   1      //      getrtc1();
+ 399   1              dispstr(":",18,18);
+ 400   1              dispstr(":",21,21);
+ 401   1              while(1)
+ 402   1              {
+ 403   2                      getrtc1();
+ 404   2                      dispnum(hour,16,17);
+ 405   2                      dispnum(minute,19,20);
+ 406   2                      dispnum(second,22,23);
+ 407   2              }
+ 408   1      }
+ 409          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    960    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13      15
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
